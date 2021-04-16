@@ -1,0 +1,53 @@
+{
+    "version": 1,
+    "__COMMENT__": "if a module has created a logger before configuring the logging system,",
+    "__COMMENT__": "it should keep running with the new configuration (default behavior is to disable it)",
+    "disable_existing_loggers": false,
+    "formatters": {
+        "non_acd_formatter": {
+            "format": "datetime:{asctime}, thread:{processName};{threadName}, level:{levelname}, logger:{name}, message:{message}",
+            "style": "{",
+            "()": "acd_annotator_python.service_utils.ACDDateFormatter"
+        },
+        "acd_formatter": {
+            "format": "datetime:{asctime}, thread:{processName};{threadName}, level:{levelname}, logger:{name}, correlationId:{ACDCorrelationId}, message:{message}",
+            "style": "{",
+            "()": "acd_annotator_python.service_utils.ACDDateFormatter"
+        }
+    },
+    "__COMMENT__": "The 'has_acd_metadata' filter keeps only messages that have a 'correlationId'",
+    "filters": {
+        "has_acd_metadata": {
+            "()": "acd_annotator_python.service_utils.ACDLogFilter",
+            "require_acd_metadata": true
+        },
+        "lacks_acd_metadata": {
+            "()": "acd_annotator_python.service_utils.ACDLogFilter",
+            "require_acd_metadata": false
+        }
+    },
+    "handlers": {
+        "acd_handler": {
+            "class": "logging.StreamHandler",
+            "formatter": "acd_formatter",
+            "filters": ["has_acd_metadata"]
+        },
+        "non_acd_handler": {
+            "class": "logging.StreamHandler",
+            "formatter": "non_acd_formatter",
+            "filters": ["lacks_acd_metadata"]
+        }
+    },
+    "__COMMENT__": "disable uvicorn's built-in request logging, which is redundant w ACD's own logging",
+    "loggers": {
+        "uvicorn": {
+            "level": "WARNING"
+        },
+        "": {
+            "handlers": [
+                "acd_handler", "non_acd_handler"
+            ],
+            "level": "DEBUG"
+        }
+    }
+}

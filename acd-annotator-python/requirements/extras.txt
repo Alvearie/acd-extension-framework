@@ -1,0 +1,6 @@
+# These packages are not required to run the python ACD microservice.
+# They enable some of the demo annotators.
+spacy==3.0.5
+stanza==1.2
+python-dotenv==0.17.0  # parse .env files into environment
+datamodel-code-generator[http]==0.10.2  # json schema -> pydantic
