@@ -106,6 +106,7 @@ def build(custom_annotator):
     VERSION: str = service_utils.getenv('com_ibm_watson_health_common_version', DEFAULT_VERSION)
     MAX_THREADS: int = int(service_utils.getenv('com_ibm_watson_health_common_python_max_threads',
                                                 DEFAULT_MAX_THREADS))
+    PROCESS_URL = "/process"
 
     app = FastAPI(
         title=ANNOTATOR_NAME,
@@ -113,14 +114,19 @@ def build(custom_annotator):
         description=ANNOTATOR_DESCRIPTION,
     )
 
-    @app.post(BASE_URL + "/process")
+    @app.post(BASE_URL + PROCESS_URL)
     async def process_endpoint(request: Request, body=Body(..., example=EXAMPLE_REQUEST)):
         """Run this microservice annotator over a request consisting of a ContainerGroup."""
         # Note: we can put `container_group:ContainerGroup` in the definition above and fastapi
         # would create a schema for it and expose it in swagger. But the container model is so
         # big that it makes this unwieldy. So we'll just accept the raw request for now. If
         # you want to see the schema you can do `print(ContainerGroup.schema_json(indent=2))`
-        #
+
+        # require json input
+        if not service_utils.has_json_content_type(request):
+            raise ACDException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+                               description="Unsupported Media Type")
+
         # body has already been parsed into a dict. Translate java offsets to python offsets.
         body = container_utils.java2python(body)
         # Input validation: you can enable/disable this input validation check depending on how much
@@ -128,8 +134,9 @@ def build(custom_annotator):
         try:
             container_group = ContainerGroup(**body)
             container_group.schema_json()
-        except Exception:
-            # logging.exception('Input container failed validation')  # for debug only--don't log input containers
+        except Exception as e:
+            # note: exception messages get sanitized in the exception handler to avoid logging doc bodies
+            logging.exception('Input container failed validation')
             raise ACDException(status_code=status.HTTP_400_BAD_REQUEST,
                                description="Input container failed validation")
 
@@ -150,8 +157,8 @@ def build(custom_annotator):
         # validation exception -> 500
         except ValidationError:
             error_msg = 'This service produced an invalid container.'
-            # Note: it's ok to log this stack trace--pydantic invalid edit errors only log
-            # the operation that failed, not the container contents.
+
+            # note: exception messages get sanitized in the exception handler to avoid logging doc bodies
             logging.exception(error_msg)
             raise ACDException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                                description=error_msg)
@@ -265,7 +272,16 @@ def build(custom_annotator):
         we will translate fastapi's 422s back to 400.
         :return:
         """
+        # A bad mediatype trumps a bad json parse
+        if request.url.path.endswith(PROCESS_URL):
+            if not service_utils.has_json_content_type(request):
+                return JSONResponse("Unsupported Media Type", status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+
+        # Note: we don't want to log the full str(exc). In handling validation errors
+        # pydantic is super aggressive and reports the whole document body.
         # error_msg = str(exc)  # this is super verbose and returns the whole input document
+
+        # exc.raw_errors just includes the errors portion--not the document body
         error_msg = ',   '.join(str(e) for e in exc.raw_errors)
         acd_exception = service_utils.ACDException(status_code=400, description=error_msg)
         return JSONResponse(acd_exception.detail, status_code=acd_exception.status_code)

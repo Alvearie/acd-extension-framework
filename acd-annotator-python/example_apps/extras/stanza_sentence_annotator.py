@@ -12,7 +12,7 @@ import logging
 
 from pydantic.typing import Optional, List
 
-from acd_annotator_python.container_model.main import UnstructuredContainerData
+from acd_annotator_python.container_model.main import UnstructuredContainer, UnstructuredContainerData
 from acd_annotator_python.container_model.common import BaseAnnotation
 from acd_annotator_python import service_utils
 from acd_annotator_python import fastapi_app_factory
@@ -72,7 +72,7 @@ class StanzaSentenceAnnotator(ACDAnnotator):
         resources failed to load correctly, etc."""
         return True
 
-    async def annotate(self, unstructured_container, request: Request):
+    async def annotate(self, unstructured_container: UnstructuredContainer, request: Request):
         """
         An annotator that injects sentence annotations into a container.
         :param unstructured_container: an UnstructuredContainer to be processed and modified in-place.

@@ -61,6 +61,7 @@ class TestMain:
             assert response.status_code == 500
 
     def test_invalid_container_error(self):
+        headers = {'content-type': 'application/json'}
         example_container = {
             "unstructured": [
                 {
@@ -85,37 +86,48 @@ class TestMain:
             ]
         }
         with TestClient(fastapi_app_factory.build(InvalidContainerModelErrorAnnotator())) as client:
-            response = client.post(BASE_URL + "/process", json.dumps(example_container))
+            response = client.post(BASE_URL + "/process", json.dumps(example_container), headers=headers)
             assert response.status_code == 500
 
     def test_process(self):
+        headers = {'content-type': 'application/json'}
         with TestClient(fastapi_app_factory.build(NoopAnnotator())) as client:
             request = ""
-            response = client.post(BASE_URL + "/process", request)
+            response = client.post(BASE_URL + "/process", request, headers=headers)
             assert response.status_code == 400
 
             # ignore empty container
             request = json.dumps({})
-            response = client.post(BASE_URL + "/process", request)
+            response = client.post(BASE_URL + "/process", request, headers=headers)
             assert response.status_code == 200
             assert response.text == request
 
             # real container
             request = json.dumps(EXAMPLE_REQUEST)
-            response = client.post(BASE_URL + "/process", request)
+            response = client.post(BASE_URL + "/process", request, headers=headers)
             assert response.status_code == 200
+
+            # bad mime type
+            request = json.dumps(EXAMPLE_REQUEST)
+            response = client.post(BASE_URL + "/process", request, headers={'content-type': 'plain/text'})
+            assert response.status_code == 415
+
+            # bad mime type trumps bad json parse body
+            response = client.post(BASE_URL + "/process", "{:asdfasdf", headers={'content-type': 'plain/text'})
+            assert response.status_code == 415
 
             # we require an unstructured container at the top level. You can
             # add unknown stuff to the inside and we'll pass it through, but not at the top level.
             request = json.dumps({"bogus": {}})
-            response = client.post(BASE_URL + "/process", request)
+            response = client.post(BASE_URL + "/process", request, headers=headers)
             assert response.status_code == 400
 
     def test_process_error(self):
+        headers = {'content-type': 'application/json'}
         with TestClient(fastapi_app_factory.build(ErrorAnnotator())) as client:
             # ErrorAnnotator should blow up when it sees a real request
             request = json.dumps(EXAMPLE_REQUEST)
-            response = client.post(BASE_URL + "/process", request)
+            response = client.post(BASE_URL + "/process", request, headers=headers)
             assert response.status_code == 500
 
 

@@ -11,6 +11,10 @@ import pytest
 from pydantic import ValidationError
 
 from acd_annotator_python import container_utils
+# from acd_annotator_python.container_model import main
+from acd_annotator_python.container_model import common
+from acd_annotator_python.container_model import annotations
+from acd_annotator_python.container_model import clinical_insights
 
 
 def test_validate_container_group():
@@ -297,14 +301,24 @@ def test_validate_unstructured_data_errors():
                       file=sys.stderr)
 
 
-# this one is a bit spooky. technically it's ok because coveredText isn't required
-# and covered_text is a new field. But maybe in future we want to disallow alternative
-# cases for fields that would be easy mistakes to make.
-# def test_concept1():
-#     """test for Concept"""
-#     with pytest.raises(ValidationError):
-#         # should be coveredText
-#         container_utils.acd_datamodel.Concept(begin=1, end=2, covered_text='abcd')  # (sdk validation fails)
+# Disallow alternative cases for fields that would be easy mistakes to make.
+def test_concept1():
+    """test for Concept"""
+    with pytest.raises(ValidationError):
+        # should be coveredText
+        container_utils.acd_datamodel.Concept(begin=1, end=2, covered_text='a')  # (sdk validation fails)
+
+    with pytest.raises(ValidationError):
+        # should be coveredText
+        container_utils.acd_datamodel.Concept(Begin=1, end=2, covered_text='a')  # (sdk validation fails)
+
+    with pytest.raises(ValidationError):
+        # should be coveredText
+        container_utils.acd_datamodel.Concept(Begin=1, end=2, COVEREDTEXT='a')  # (sdk validation fails)
+
+    with pytest.raises(ValidationError):
+        # should be coveredText
+        container_utils.acd_datamodel.Concept(Begin=1, end=2, coveredtext='a')  # (sdk validation fails)
 
 
 def test_section1():
@@ -380,6 +394,10 @@ def test_edit_unstructured_container():
     # load in a valid base container, and then make sure a number of invalid edits all break
     container_group = container_utils.acd_datamodel.ContainerGroup(**example_container)
 
+    with pytest.raises(Exception):
+        container_group.bogus = 'a'  # don't allow extra fields at this level
+    container_group.unstructured[0].bogus = 'b'  # extra info inside the container is fine
+
     with pytest.raises(ValidationError):
         container_group.unstructured[0].text = {}  # bad type
     with pytest.raises(ValidationError):
@@ -418,6 +436,38 @@ def test_edit_structured_container():
     container_utils.acd_datamodel.ContainerGroup(**example_container)
 
 
+def test_obvious_misspelling():
+    common.BaseAnnotation(begin=0, end=8, coveredText='anteater')
+    with pytest.raises(ValidationError):
+        # create an annotation with covered_text instead of coveredText
+        common.BaseAnnotation(begin=0, end=8, covered_text='anteater')
+
+    with pytest.raises(ValidationError):
+        annotations.MedicationInd()  # annotation requires at a minimum begin/end
+
+    annotations.MedicationInd(begin=0, end=8, coveredText='anteater', type='bogus')
+    with pytest.raises(ValidationError):
+        annotations.MedicationInd(begin=0, end=8, coveredText='anteater', Type='bogus')
+    with pytest.raises(ValidationError):
+        annotations.MedicationInd(begin=0, end=8, coveredText='anteater', tyPe='bogus')
+    with pytest.raises(ValidationError):
+        annotations.MedicationInd(begin=0, end=8, coveredText='anteater', TYPE='bogus')
+
+    clinical_insights.InsightModelAlcoholUsage()
+    clinical_insights.InsightModelAlcoholUsage(useScore=.5, discussedScore=.2)
+    clinical_insights.InsightModelAlcoholUsage(useScore=.5, discussedScore=.2, bogus_score=.7)
+    with pytest.raises(ValidationError):
+        clinical_insights.InsightModelAlcoholUsage(use_score=.5)
+    with pytest.raises(ValidationError):
+        clinical_insights.InsightModelAlcoholUsage(use_score=.5, discussed_score=.2)
+
+
 # # enable to debug
 # if __name__ == '__main__':
-#     test_edit_unstructured_container()
+#     # test_validate_annotation()
+#     from acd_annotator_python.container_model import annotations
+#     from acd_annotator_python.container_model import main
+#     container_group_dict = {'unstructured': [{'text': 'abc', 'data': {
+#         'AllergyMedicationInd': [{"begin":3,"end":5,"coveredText":"hi"}],
+#     }}]}
+#     cg=main.ContainerGroup(**container_group_dict)

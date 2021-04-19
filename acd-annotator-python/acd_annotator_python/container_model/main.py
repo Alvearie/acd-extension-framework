@@ -72,11 +72,11 @@ class UnstructuredContainerData(BaseModelACD):
 
 
 class Container(BaseModelACD):
-    id: Optional[str] = None
-    type: Optional[str] = None
+    id: Optional[StrictStr] = None
+    type: Optional[StrictStr] = None
     data: Optional[UnstructuredContainerData]
-    metadata: Optional[Dict[str, Any]] = None
-    uid: Optional[int] = None
+    metadata: Optional[Dict[StrictStr, Any]] = None
+    uid: Optional[StrictInt] = None
 
 
 class UnstructuredContainer(Container):

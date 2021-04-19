@@ -197,6 +197,15 @@ class KVLogBuilder:
         return f'kv|{kv_str}|'
 
 
+def has_json_content_type(request: Request):
+    """
+    Does this request have a content-type: application/json media type?
+    """
+    if request.headers.get('content-type') is None:
+        return False
+    return 'application/json' in request.headers.get('content-type')  # fast api converts to lower
+
+
 def get_header_log(request: Request):
     remove_headers = ['cookie']
     mask_headers = ['authorization']

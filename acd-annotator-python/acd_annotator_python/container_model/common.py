@@ -6,11 +6,18 @@
 #                                                                   #
 # ***************************************************************** #
 
-from pydantic import BaseModel, validator, root_validator, Extra
+from pydantic import BaseModel, validator, root_validator, Extra, Field
 # StrictInt, etc does not attempt to do automatic type casting, e.g., "1" -> 1
 from pydantic import StrictInt, StrictStr
 from pydantic.fields import ModelField
 from typing import Optional, Any, Dict
+
+
+def normalize_field_names(fields):
+    """
+    Map field names to a normalized form to check for collisions like 'coveredText' vs 'covered_text'
+    """
+    return set(s.replace('_','').lower() for s in fields)
 
 
 class BaseModelACD(BaseModel):
@@ -18,6 +25,7 @@ class BaseModelACD(BaseModel):
     Every new object should extend this one directly or indirectly, treating it
     like you normally would pydantic.BaseModel.
     """
+
     class Config:
         """Additional config that should be inherited by every object in our data model."""
         # allow extra fields to be parsed/created and preserve them so they are
@@ -27,6 +35,12 @@ class BaseModelACD(BaseModel):
         allow_mutation = True
         # run validation whenever an item in the object graph is edited
         validate_assignment = True
+        # Note: we experimented briefly with aliases to allow snake case to be converted to camelCase,
+        # but it changed some behavior deep in pydantic and broke some seemingly unrelated test cases.
+        # Also, it would probably cause more confusion that it was worth to allow code to specify snake case
+        # when the container is in camelCase--not worth the convenience.
+        # alias_generator = camel_to_snake_case
+        # allow_population_by_field_name = True
 
     # TODO: pydantic happily casts [] -> {} for class creation, which isn't ideal.
     # But the following doesn't work, because the cast has already happened before the pre root
@@ -56,6 +70,25 @@ class BaseModelACD(BaseModel):
 
         cls.__fields__.update(new_fields)
         cls.__annotations__.update(new_annotations)
+
+    @root_validator(pre=True, skip_on_failure=True)
+    def check_for_misspellings(cls, values):
+        """
+        Make sure that we don't allow input that is likely to be a misspelling by
+        normalizing text and then checking for collisions (like coveredText vs covered_text).
+        """
+        normalized_values = normalize_field_names(values.keys())
+        # these are all the provided values that don't exactly match a known field
+        non_matches = set(values.keys()).difference(cls.__fields__.keys())
+        # if any non-matches collide with a known field after normalization, complain
+        normalized_non_matches = normalize_field_names(non_matches)
+        # normalize the built-in fields (cache these per class so we don't have to re-normalize a bunch of times)
+        if not hasattr(cls, '_normalized_pydantic_fields)'):
+            cls._normalized_pydantic_fields = normalize_field_names(cls.__fields__.keys())
+        collisions = normalized_non_matches.intersection(cls._normalized_pydantic_fields)
+        assert len(collisions) == 0, \
+            f'Misspelling detected: {non_matches} collides with expected field in {list(cls.__fields__.keys())}'
+        return values
 
 
 class Entity(BaseModelACD):
@@ -91,6 +124,7 @@ class BaseAnnotation(Entity):
         begin, end, covered_text = values['begin'], values['end'], values.get('coveredText')
         if covered_text is not None:
             if (end - begin) != len(covered_text):
-                raise ValueError(f'covered text length must be equals to end-begin. '
-                                 f'Found begin={begin}, end={end}, coveredText={covered_text}')
+                # Note: don't log the covered text itself!
+                raise ValueError(f'covered text length must be equal to end-begin. '
+                                 f'Found begin={begin}, end={end}, coveredText length={len(covered_text)}')
         return values

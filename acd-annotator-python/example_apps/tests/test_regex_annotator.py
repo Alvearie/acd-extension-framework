@@ -42,6 +42,7 @@ class TestMain:
         assert response.status_code == 200
 
     def test_process(self, client):
+        headers = {'content-type': 'application/json'}
         # positive example with two matches
         example_json = {"unstructured": [{
             "text": "Mean patient age is 43 years old. Patients have no hx of heart problems."
@@ -68,6 +69,6 @@ class TestMain:
             }
         }]}
         request = json.dumps(example_json)
-        response = client.post(BASE_URL + "/process", request)
+        response = client.post(BASE_URL + "/process", request, headers=headers)
         assert response.status_code == 200
         assert response.json() == example_json_response
