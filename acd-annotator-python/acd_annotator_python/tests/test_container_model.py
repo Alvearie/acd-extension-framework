@@ -10,6 +10,7 @@ import sys
 import pytest
 from pydantic import ValidationError
 
+import main
 from acd_annotator_python import container_utils
 # from acd_annotator_python.container_model import main
 from acd_annotator_python.container_model import common
@@ -460,6 +461,83 @@ def test_obvious_misspelling():
         clinical_insights.InsightModelAlcoholUsage(use_score=.5)
     with pytest.raises(ValidationError):
         clinical_insights.InsightModelAlcoholUsage(use_score=.5, discussed_score=.2)
+
+
+def test_attribute_value_ref():
+    # completely invented example
+    example_container_dic = {
+        "unstructured": [
+            {
+                "text": "she has a history of pulmonary embolism",
+                "data": {
+                    "SymptomDiseaseInd": [
+                        {
+                            "begin": 21,
+                            "ccsCode": "103",
+                            "coveredText": "pulmonary embolism",
+                            "cui": "C0034065",
+                            "dateInMilliseconds": " ",
+                            "disambiguationData": {
+                                "validity": "VALID"
+                            },
+                            "end": 39,
+                            "hccCode": "107",
+                            "icd10Code": "I26.99,I26.9",
+                            "icd9Code": "415.19",
+                            "insightModelData": {
+                                "diagnosis": {
+                                    "familyHistoryScore": 0.001,
+                                    "suspectedScore": 0.001,
+                                    "symptomScore": 0.0,
+                                    "traumaScore": 0.0,
+                                    "usage": {
+                                        "discussedScore": 0.002,
+                                        "explicitScore": 0.998,
+                                        "patientReportedScore": 0.0
+                                    }
+                                }
+                            },
+                            "modality": "positive",
+                            "snomedConceptId": "59282003",
+                            "symptomDiseaseNormalizedName": "pulmonary embolism",
+                            "symptomDiseaseSurfaceForm": "pulmonary embolism",
+                            "type": "aci.SymptomDiseaseInd",
+                            "uid": 2
+                        }
+                    ],
+                    "attributeValues": [
+                        {
+                            "begin": 21,
+                            "ccsCode": "103",
+                            "concept": {
+                                "uid": 2
+                            },
+                            "coveredText": "pulmonary embolism",
+                            "disambiguationData": {
+                                "validity": "VALID"
+                            },
+                            "end": 39,
+                            "hccCode": "107",
+                            "icd10Code": "I26.99,I26.9",
+                            "icd9Code": "415.19",
+                            "insightModelData": {
+                                "diagnosis": {
+                                    "familyHistoryScore": 0.001,
+                                    "suspectedScore": 0.001,
+                                    "symptomScore": 0.0,
+                                    "traumaScore": 0.0,
+                                    "usage": {
+                                        "discussedScore": 0.002,
+                                        "explicitScore": 0.998,
+                                        "patientReportedScore": 0.0
+                                    }
+                                }
+                            }}
+                    ]
+                }}]
+    }
+    # make sure this large example parses without breaking
+    cg = main.ContainerGroup(**example_container_dic)
 
 
 # # enable to debug

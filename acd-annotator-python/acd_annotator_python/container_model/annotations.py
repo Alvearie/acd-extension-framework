@@ -43,8 +43,8 @@ class NluEntity(Annotation):
 
 
 class Reference(BaseModelACD):
-    uid: StrictInt
-    type: StrictStr
+    uid: Optional[StrictInt]
+    type: Optional[StrictStr]
 
 
 class RelationNode(Entity):
@@ -58,8 +58,8 @@ class Relation(Entity):
 
 
 class SpellingCorrectionSuggestion(Entity):
-    applied: StrictBool
-    confidence: float
+    applied: Optional[StrictBool]
+    confidence: Optional[float]
     semtypes: Optional[List[StrictStr]]
     text: Optional[StrictStr]
 
@@ -129,8 +129,8 @@ class AttributeValueEntry(BaseModel):
 
 class AttributeValueReference(BaseModel):
     valueIndex: Optional[StrictInt]
-    uid: StrictInt
-    type: StrictStr
+    uid: Optional[StrictInt]
+    type: Optional[StrictStr]
 
 
 class AttributeValueQualifierEntry(Annotation):
