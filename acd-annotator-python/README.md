@@ -4,7 +4,7 @@ An ACD Annotator implemented as a python microservice that can be customized and
 
 # Getting Started
 
-## Install python3.8 and virtualenv ##
+## Install python3.8+ and virtualenv ##
 You can check whether virtualenv is already installed by running `virtualenv -h`. 
 The best way to install virtualenv will depend on your environment, 
 but most users should be able to do `pip3 install --user virtualenv` and then 
