@@ -18,7 +18,7 @@ from acd_annotator_python import service_utils
 from acd_annotator_python import fastapi_app_factory
 from acd_annotator_python.acd_annotator import ACDAnnotator
 
-base_logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 # new concepts will be created with this type
 MATCH_TYPE = 'SpacySentence'
@@ -59,10 +59,6 @@ class SpacySentenceAnnotator(ACDAnnotator):
         :param request: a fastapi.Request object for the current request
         :return: none
         """
-        # decorate the logger with information about the correlation id, which allows you to track a single
-        # request across the logs of multiple acd annotators.
-        logger = service_utils.ACDLoggerAdapter(base_logger, request)
-
         data = unstructured_container.data
         text = unstructured_container.text
         if data is not None and text is not None:

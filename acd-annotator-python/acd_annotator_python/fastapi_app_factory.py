@@ -19,7 +19,7 @@ from acd_annotator_python import container_utils
 from acd_annotator_python import service_utils
 from acd_annotator_python.service_utils import ACDException
 
-base_logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 EXAMPLE_REQUEST = {"unstructured": [
     {
@@ -240,9 +240,10 @@ def build(custom_annotator):
     @app.middleware("http")
     async def request_middleware(request: Request, call_next):
         """A hook that gets called on each request"""
-        # create a logger adapter for this request that can be used to add an acd prefix
-        # to all logging statements (adds a correlation id for tracking a request across microservices)
-        logger = service_utils.ACDLoggerAdapter(base_logger, request)
+        # set a context variable (acts like a thread local variable) that is used to
+        # decorate all logging statements (adds a correlation id for tracking a request across microservices)
+        correlation_id = request.headers.get("x-correlation-id", "null")
+        service_utils.correlation_id_var.set(correlation_id)
 
         # entry logging
         start_ts = time.time()

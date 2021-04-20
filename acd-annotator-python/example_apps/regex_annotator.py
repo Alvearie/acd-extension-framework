@@ -15,7 +15,7 @@ from acd_annotator_python import service_utils
 from acd_annotator_python import fastapi_app_factory
 from acd_annotator_python.acd_annotator import ACDAnnotator
 
-base_logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 # new concepts will be created with this concept unique identifier (CUI)
 MATCH_CUI = 'RegexAnnotator'
@@ -36,7 +36,7 @@ class RegexAnnotator(ACDAnnotator):
         """
         super().__init__()
         self.search_patterns = search_patterns
-        base_logger.info("Initializing RegexAnnotator with patterns: %s", search_patterns)
+        logger.info("Initializing RegexAnnotator with patterns: %s", search_patterns)
 
     def on_startup(self, fastapi_app):
         """Load any required resources when the server starts up. (Not async to allow io operations)"""
@@ -55,9 +55,6 @@ class RegexAnnotator(ACDAnnotator):
         :param request: a fastapi.Request object for the current request
         :return: none
         """
-        # decorate the logger with information about the correlation id, which allows you to track a single
-        # request across the logs of multiple acd annotators.
-        logger = service_utils.ACDLoggerAdapter(base_logger, request)
 
         data = unstructured_container.data
         text = unstructured_container.text

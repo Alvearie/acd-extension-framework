@@ -6,6 +6,7 @@
 #                                                                   #
 # ***************************************************************** #
 
+import contextvars
 import json
 import os
 import socket
@@ -17,6 +18,7 @@ import resource
 import multiprocessing
 import platform
 import psutil
+
 from fastapi import HTTPException, status, Request
 
 logger = logging.getLogger(__name__)
@@ -223,28 +225,40 @@ def get_header_log(request: Request):
     return ' '.join(redacted_header)
 
 
-class ACDLoggerAdapter(logging.LoggerAdapter):
-    """
-    An adapter that populates {correlationId} in a format string,
-    allowing requests to be tracked across different microservice
-    annotators in a flow.
-    """
-
-    def __init__(self, base_logger, request):
-        super().__init__(base_logger, {
-            'ACDCorrelationId': request.headers.get("x-correlation-id", "null"),
-        })
-
-
 class ACDDateFormatter(logging.Formatter):
+    """
+    Format a date in the same iso format produced by java ACD services:
+    e.g., "2021-04-20T14:54:18.693Z"
+    """
     # converter = datetime.fromtimestamp
     def formatTime(self, record, datefmt=None):
         # ct = self.converter(record.created)
-        # techically we should use record.created, but not sure how to make that timezone compliant
+        # technically we should use record.created, but not sure how to make that timezone compliant
         return datetime.now(timezone.utc).isoformat().replace("+00:00", "")[:-3] + "Z"
 
 
-class ACDLogFilter(logging.Filter):
+# correlation id for the current requests (acts like a thread local variable)
+correlation_id_var = contextvars.ContextVar("correlation_id")
+
+
+class AppendACDMetadataLogFilter(logging.Filter):
+    """
+    This filter doesn't actually remove anything--it adds
+    the correlation id (if available) from a thread local variable.
+    """
+    def filter(self, record):
+        try:
+            record.ACDCorrelationId = correlation_id_var.get()
+        except LookupError:
+            pass
+        return True
+
+
+class HasACDMetadataLogFilter(logging.Filter):
+    """
+    If require_acd_metadata is true, drops all records without acd metadata.
+    Otherwise, drops all records with acd metadata.
+    """
     def __init__(self, require_acd_metadata):
         super().__init__()
         self.require_acd_metadata = require_acd_metadata

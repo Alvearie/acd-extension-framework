@@ -1,7 +1,6 @@
 {
     "version": 1,
-    "__COMMENT__": "if a module has created a logger before configuring the logging system,",
-    "__COMMENT__": "it should keep running with the new configuration (default behavior is to disable it)",
+    "__COMMENT__": "disable_existing_loggers allows loggers that existed before configuration to keep functioning",
     "disable_existing_loggers": false,
     "formatters": {
         "non_acd_formatter": {
@@ -15,14 +14,17 @@
             "()": "acd_annotator_python.service_utils.ACDDateFormatter"
         }
     },
-    "__COMMENT__": "The 'has_acd_metadata' filter keeps only messages that have a 'correlationId'",
+    "__COMMENT__": "acd_metadata_appending_filter decorates all log records with a 'correlationId'",
     "filters": {
+        "append_acd_metadata_filter": {
+            "()": "acd_annotator_python.service_utils.AppendACDMetadataLogFilter"
+        },
         "has_acd_metadata": {
-            "()": "acd_annotator_python.service_utils.ACDLogFilter",
+            "()": "acd_annotator_python.service_utils.HasACDMetadataLogFilter",
             "require_acd_metadata": true
         },
         "lacks_acd_metadata": {
-            "()": "acd_annotator_python.service_utils.ACDLogFilter",
+            "()": "acd_annotator_python.service_utils.HasACDMetadataLogFilter",
             "require_acd_metadata": false
         }
     },
@@ -30,7 +32,7 @@
         "acd_handler": {
             "class": "logging.StreamHandler",
             "formatter": "acd_formatter",
-            "filters": ["has_acd_metadata"]
+            "filters": ["append_acd_metadata_filter","has_acd_metadata"]
         },
         "non_acd_handler": {
             "class": "logging.StreamHandler",
