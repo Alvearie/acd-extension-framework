@@ -4,17 +4,25 @@ An ACD Annotator implemented as a python microservice that can be customized and
 
 # Getting Started
 
-## Install dependencies in a virtualenv environment ##
-First you need a working python 3.8+ install with virtualenv installed. 
-You can check whether it's installed by running `virtualenv -h`. 
+## Install python3.8 and virtualenv ##
+You can check whether virtualenv is already installed by running `virtualenv -h`. 
 The best way to install virtualenv will depend on your environment, 
 but most users should be able to do `pip3 install --user virtualenv` and then 
-make sure that your `PATH` is set up to point to the location where it was installed.
+make sure that your `PATH` is set up to point to the location where virtualenv was installed.
 (Hint: Os X users may need to adjust their PATH in .bash_profile; 
 Linux users may need to adjust their PATH in .bashrc)
 
-Once that is done, create a virtualenv environment and 
-install required dependencies by running
+For example, Os X prints out the following helpful message after pip installing virtualenv
+telling your how to adjust your path:
+
+```
+Installing collected packages: virtualenv
+  WARNING: The script virtualenv is installed in '/Users/[username]/Library/Python/3.9/bin' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+```
+
+## Install dependencies in a virtualenv environment ##
+Create a virtualenv environment and install required dependencies by running
 ```
 bash ./scripts/install.sh
 ```
