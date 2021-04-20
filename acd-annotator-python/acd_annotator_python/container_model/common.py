@@ -11,6 +11,11 @@ from pydantic import BaseModel, validator, root_validator, Extra, Field
 from pydantic import StrictInt, StrictStr
 from pydantic.fields import ModelField
 from typing import Optional, Any, Dict
+import logging
+
+from acd_annotator_python import container_model
+
+logger = logging.getLogger(__name__)
 
 
 def normalize_field_names(fields):
@@ -125,6 +130,12 @@ class BaseAnnotation(Entity):
         if covered_text is not None:
             if (end - begin) != len(covered_text):
                 # Note: don't log the covered text itself!
-                raise ValueError(f'covered text length must be equal to end-begin. '
-                                 f'Found begin={begin}, end={end}, coveredText length={len(covered_text)}')
+                error_msg = f'covered text length must be equal to end-begin. ' \
+                            f'Found begin={begin}, end={end}, coveredText length={len(covered_text)}'
+                # This covered text check is non-critical. In permissive mode just log the
+                # problem instead of exploding.
+                if container_model.PERMISSIVE_MODE:
+                    logger.warning(error_msg)
+                else:
+                    raise ValueError(error_msg)
         return values

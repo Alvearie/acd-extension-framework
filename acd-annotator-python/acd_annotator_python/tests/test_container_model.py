@@ -7,12 +7,14 @@
 # ***************************************************************** #
 
 import sys
+import os
+import importlib
 import pytest
 from pydantic import ValidationError
 
-import main
 from acd_annotator_python import container_utils
-# from acd_annotator_python.container_model import main
+from acd_annotator_python import container_model
+from acd_annotator_python.container_model import main
 from acd_annotator_python.container_model import common
 from acd_annotator_python.container_model import annotations
 from acd_annotator_python.container_model import clinical_insights
@@ -539,6 +541,40 @@ def test_attribute_value_ref():
     # make sure this large example parses without breaking
     cg = main.ContainerGroup(**example_container_dic)
 
+
+def test_permissive_mode():
+    """
+    When permissive mode is activated, less critical validation problems
+    will log warnings instead of raising errors
+    """
+
+    # container with a bad coveredText
+    example_container_dic = {
+        "unstructured": [
+            {
+                "text": "like a fish out of water",
+                "data": {
+                    "concepts": [{"begin": 7, "end": 11, "coveredText": "a fish"}]
+                }
+            }
+        ]
+    }
+    # strict mode fail
+    orig_setting = os.environ.get('com_ibm_watson_health_common_python_permissive_validation')
+    os.environ['com_ibm_watson_health_common_python_permissive_validation'] = 'false'
+    importlib.reload(container_model)
+    with pytest.raises(ValidationError):
+        main.ContainerGroup(**example_container_dic)
+    # permissive mode succeeds
+    os.environ['com_ibm_watson_health_common_python_permissive_validation'] = 'true'
+    importlib.reload(container_model)
+    main.ContainerGroup(**example_container_dic)
+    # reset environment
+    if orig_setting is None:
+        del os.environ['com_ibm_watson_health_common_python_permissive_validation']
+    else:
+        os.environ['com_ibm_watson_health_common_python_permissive_validation'] = orig_setting
+    importlib.reload(container_model)
 
 # # enable to debug
 # if __name__ == '__main__':
