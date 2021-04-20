@@ -20,7 +20,19 @@ from acd_annotator_python.container_model import annotations
 from acd_annotator_python.container_model import clinical_insights
 
 
+def set_strict_validation():
+    os.environ['com_ibm_watson_health_common_python_permissive_validation'] = 'false'
+    importlib.reload(container_model)
+
+
+def set_permissive_validation():
+    os.environ['com_ibm_watson_health_common_python_permissive_validation'] = 'true'
+    importlib.reload(container_model)
+
+
 def test_validate_container_group():
+    set_strict_validation()
+
     container_group_dict = {}
     container_utils.from_dict(container_group_dict)
 
@@ -56,6 +68,8 @@ def test_validate_container_group():
 
 
 def test_validate_container_group_errors():
+    set_strict_validation()
+
     container_group_dict = {'bogus'}  # this is a set, not a dict
     with pytest.raises(TypeError):
         container_utils.from_dict(container_group_dict)
@@ -139,6 +153,8 @@ def build_annotation(extra_fields=None):
 
 
 def test_validate_unstructured_data():
+    set_strict_validation()
+
     # tests for data.concepts, data.sections, etc.
     for data_type in UNSTRUCTURED_DATA_TYPES:
         valid_anns = []
@@ -217,6 +233,8 @@ def test_validate_unstructured_data():
 
 
 def test_validate_unstructured_data_errors():
+    set_strict_validation()
+
     # invalid begin/end/type tests for data.concepts, data.sections, etc.
     # bad/incomplete annotations should fail anywhere they are put
     for data_type in UNSTRUCTURED_DATA_TYPES:
@@ -307,6 +325,8 @@ def test_validate_unstructured_data_errors():
 # Disallow alternative cases for fields that would be easy mistakes to make.
 def test_concept1():
     """test for Concept"""
+    set_strict_validation()
+
     with pytest.raises(ValidationError):
         # should be coveredText
         container_utils.acd_datamodel.Concept(begin=1, end=2, covered_text='a')  # (sdk validation fails)
@@ -326,6 +346,8 @@ def test_concept1():
 
 def test_section1():
     """test for Section"""
+    set_strict_validation()
+
     # does not need coveredText
     container_utils.acd_datamodel.Section(begin=1, end=2)
 
@@ -335,6 +357,8 @@ def test_edit_concepts():
     We need validation to happen at runtime each time the container model is edited,
     not just when parsing json. We've set that option in our BaseModelACD, testing here.
     """
+    set_strict_validation()
+
     example_container = {
         "unstructured": [
             {
@@ -384,6 +408,8 @@ def test_edit_unstructured_container():
     We need validation to happen at runtime each time the container model is edited,
     not just when parsing json. We've set that option in our BaseModelACD, testing here.
     """
+    set_strict_validation()
+
     example_container = {
         "unstructured": [
             {
@@ -425,6 +451,8 @@ def test_edit_structured_container():
     """
     structured containers are still a work in process. Very preliminary sanity test
     """
+    set_strict_validation()
+
     example_container = {
         "structured": [
             {
@@ -440,6 +468,8 @@ def test_edit_structured_container():
 
 
 def test_obvious_misspelling():
+    set_strict_validation()
+
     common.BaseAnnotation(begin=0, end=8, coveredText='anteater')
     with pytest.raises(ValidationError):
         # create an annotation with covered_text instead of coveredText
@@ -466,6 +496,8 @@ def test_obvious_misspelling():
 
 
 def test_attribute_value_ref():
+    set_strict_validation()
+
     # completely invented example
     example_container_dic = {
         "unstructured": [
@@ -560,21 +592,12 @@ def test_permissive_mode():
         ]
     }
     # strict mode fail
-    orig_setting = os.environ.get('com_ibm_watson_health_common_python_permissive_validation')
-    os.environ['com_ibm_watson_health_common_python_permissive_validation'] = 'false'
-    importlib.reload(container_model)
+    set_strict_validation()
     with pytest.raises(ValidationError):
         main.ContainerGroup(**example_container_dic)
     # permissive mode succeeds
-    os.environ['com_ibm_watson_health_common_python_permissive_validation'] = 'true'
-    importlib.reload(container_model)
+    set_permissive_validation()
     main.ContainerGroup(**example_container_dic)
-    # reset environment
-    if orig_setting is None:
-        del os.environ['com_ibm_watson_health_common_python_permissive_validation']
-    else:
-        os.environ['com_ibm_watson_health_common_python_permissive_validation'] = orig_setting
-    importlib.reload(container_model)
 
 # # enable to debug
 # if __name__ == '__main__':
