@@ -7,7 +7,7 @@
 # ***************************************************************** #
 # create a virtualenv sandbox if it doesn't already exist 
 if [ ! -e .venv ]; then
-  virtualenv .venv
+  python3 -m venv .venv
 fi
 
 # activate the virtualenv sandbox and install prereqs from requirements/base.txt and extras.txt

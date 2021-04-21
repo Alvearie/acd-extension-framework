@@ -269,4 +269,4 @@ class HasACDMetadataLogFilter(logging.Filter):
 
 
 # read in default log settings from this module's directory
-DEFAULT_LOG_SETTINGS = json.load(open(f"{os.path.dirname(__file__)}/logSettings.json"))
+DEFAULT_LOG_SETTINGS = json.load(open(f"{os.path.dirname(__file__)}/defaultLogSettings.json"))
