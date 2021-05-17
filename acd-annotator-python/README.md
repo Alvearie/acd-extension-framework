@@ -27,7 +27,7 @@ Run tests to make sure everything is working properly by doing
 bash ./scripts/run_tests.sh
 ```
 
-and then edit run.server.sh to uncomment the example you want to run. (Be aware that some of the example annotators have extra dependencies and 
+and then edit run_server.sh to uncomment the example you want to run. (Be aware that some of the example annotators have extra dependencies and 
 won't work until you run `bash ./scripts/install_extras.sh`)
 
 Then run
