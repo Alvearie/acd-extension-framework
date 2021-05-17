@@ -43,9 +43,9 @@ you'll want to install a python IDE like
 [PyDev](https://www.pydev.org/) or
 [PyCharm](https://www.jetbrains.com/pycharm/) 
 and import the project into it. Once your IDE is set up,
-you can run and debug one of the example annotators by 
-running it as main class in your IDE. Running in 
-this mode, the service will reload every time your save 
+you can debug one of the example annotators by 
+running it directly in your IDE (NOT via run_server.sh). Running in 
+this mode, the service will reload code every time you save 
 changes to a file in the project, which can make 
 developing much easier.
 
