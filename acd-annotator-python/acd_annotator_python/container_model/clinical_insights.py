@@ -116,6 +116,7 @@ class TemporalType(Entity):
 
 class TemporalRelTypes(Entity):
     overlapsScore: Optional[float]
+    durationScore: Optional[float]
 
 
 class TemporalData(BaseAnnotation):
