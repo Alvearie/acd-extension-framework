@@ -9,6 +9,7 @@
 import logging
 import logging.config
 import time
+import json
 from fastapi import FastAPI, Body, Request, Response, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -21,7 +22,7 @@ from acd_annotator_python.service_utils import ACDException
 
 logger = logging.getLogger(__name__)
 
-EXAMPLE_REQUEST = {"unstructured": [
+EXAMPLE_REQUEST = json.dumps({"unstructured": [
     {
         "text": "The patient reports severe bowel discomfort for the last week. No previous history of complaints. "
                 "No current medications\n\nFamily history:\n- Hx IBS in an uncle\n- Liver cancer in father\n\n",
@@ -67,7 +68,7 @@ EXAMPLE_REQUEST = {"unstructured": [
         }
     }
 ]
-}
+})
 
 # example service properties. These will be overridden by environment properties
 DEFAULT_ANNOTATOR_NAME = 'Example ACD Microservice'
@@ -77,7 +78,7 @@ DEFAULT_VERSION = '2021-04-06T15:37:31Z'
 DEFAULT_MAX_THREADS = 10
 
 
-def build(custom_annotator):
+def build(custom_annotator, example_request=EXAMPLE_REQUEST):
     """
     Build a fastapi app from the given custom_annotator.
 
@@ -95,6 +96,7 @@ def build(custom_annotator):
         com_ibm_watson_health_common_fastapi_max_threads
 
     :param custom_annotator: an ACDAnnotator subclass that performs the business logic of the service.
+    :param example_request: The text of an example request
     :return: FastAPI app implementing an ACD microservice.
     """
 
@@ -115,7 +117,7 @@ def build(custom_annotator):
     )
 
     @app.post(BASE_URL + PROCESS_URL)
-    async def process_endpoint(request: Request, body=Body(..., example=EXAMPLE_REQUEST)):
+    async def process_endpoint(request: Request, body=Body(..., example=example_request)):
         """Run this microservice annotator over a request consisting of a ContainerGroup."""
         # Note: we can put `container_group:ContainerGroup` in the definition above and fastapi
         # would create a schema for it and expose it in swagger. But the container model is so
@@ -142,6 +144,7 @@ def build(custom_annotator):
 
         # each container group consists of a list of UnstructuredContainer
         try:
+            # Process all of the unstructured containers
             if container_group is not None and container_group.unstructured is not None:
                 for unstructured_container in container_group.unstructured:
                     if unstructured_container is not None:
@@ -149,6 +152,13 @@ def build(custom_annotator):
                             unstructured_container.data = container_utils.create_unstructured_container()
                         # run the annotator over each UnstructuredContainer
                         await custom_annotator.annotate(unstructured_container, request)
+            # Process all of the structured containers
+            if container_group is not None and container_group.structured is not None:
+                for structured_container in container_group.structured:
+                    if structured_container is not None:
+                        if structured_container.data is None:
+                            structured_container.data = container_utils.create_structured_container()
+                        await custom_annotator.annotate_structured(structured_container, request)
         # allow the annotator to raise custom acd errors without catching them--pass them on
         except ACDException:
             # note: "raise e" would create a new stack trace,

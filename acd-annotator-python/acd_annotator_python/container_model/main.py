@@ -70,21 +70,22 @@ class UnstructuredContainerData(BaseModelACD):
     ToiletingAssistanceInd: Optional[List[Annotation]]
     WalkingAssistanceInd: Optional[List[Annotation]]
 
+class StructuredContainerData(BaseModelACD):
+    attributeMetadata: Optional[List[BaseModelACD]]
 
 class Container(BaseModelACD):
     id: Optional[StrictStr] = None
     type: Optional[StrictStr] = None
-    data: Optional[UnstructuredContainerData]
     metadata: Optional[Dict[StrictStr, Any]] = None
     uid: Optional[StrictInt] = None
 
 
 class UnstructuredContainer(Container):
+    data: Optional[UnstructuredContainerData]
     text: StrictStr
 
-
 class StructuredContainer(Container):
-    pass
+    data: Optional[StructuredContainerData]
 
 
 class ContainerGroup(BaseModel):
