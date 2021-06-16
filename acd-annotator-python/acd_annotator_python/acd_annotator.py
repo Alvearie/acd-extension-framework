@@ -11,6 +11,7 @@ import inspect
 from fastapi import Request
 
 from acd_annotator_python.container_model.main import UnstructuredContainer
+from acd_annotator_python.container_model.main import StructuredContainer
 
 
 class ACDAnnotator(ABC):
@@ -40,7 +41,6 @@ class ACDAnnotator(ABC):
         resources failed to load correctly, etc."""
         ...
 
-    @abstractmethod
     async def annotate(self, unstructured_container: UnstructuredContainer, request: Request):
         """
         Apply annotator logic to the unstructured container, altering it in-place.
@@ -48,4 +48,13 @@ class ACDAnnotator(ABC):
         :param request:
         :return:
         """
-        ...
+        pass
+
+    async def annotate_structured(self, structured_container: StructuredContainer, request: Request):
+        """
+        Apply logic to a structured container altering it in-place.
+        :param structured_container:
+        :param request:
+        :return:
+        """
+        pass

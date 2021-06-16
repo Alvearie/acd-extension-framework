@@ -184,6 +184,10 @@ def create_unstructured_container():
     """create a new object to slot into unstructured.data"""
     return acd_datamodel.UnstructuredContainerData()
 
+def create_structured_container():
+    """create a new object to slot into structured.data"""
+    return acd_datamodel.StructuredContainerData()
+
 
 def to_dict(container_group):
     """convert an object model to a python dictionary"""
