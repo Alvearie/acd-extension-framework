@@ -22,7 +22,7 @@ from acd_annotator_python.service_utils import ACDException
 
 logger = logging.getLogger(__name__)
 
-EXAMPLE_REQUEST = json.dumps({"unstructured": [
+EXAMPLE_REQUEST = {"unstructured": [
     {
         "text": "The patient reports severe bowel discomfort for the last week. No previous history of complaints. "
                 "No current medications\n\nFamily history:\n- Hx IBS in an uncle\n- Liver cancer in father\n\n",
@@ -68,7 +68,7 @@ EXAMPLE_REQUEST = json.dumps({"unstructured": [
         }
     }
 ]
-})
+}
 
 # example service properties. These will be overridden by environment properties
 DEFAULT_ANNOTATOR_NAME = 'Example ACD Microservice'
