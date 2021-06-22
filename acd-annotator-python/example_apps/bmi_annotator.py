@@ -23,8 +23,8 @@ logger = logging.getLogger(__name__)
 # This is not necessary in order to add data to the container model, but it makes
 # the new field become a proper part of the pydantic object model, which lets it
 # validate this field.
-StructuredContainerData.add_fields(height_inches=Optional[StrictInt])
-StructuredContainerData.add_fields(weight_pounds=Optional[StrictInt])
+StructuredContainerData.add_fields(heightInches=Optional[StrictInt])
+StructuredContainerData.add_fields(weightPounds=Optional[StrictInt])
 
 
 class BMIAnnotator(ACDAnnotator):
@@ -43,12 +43,12 @@ class BMIAnnotator(ACDAnnotator):
 
     async def annotate_structured(self, structured_container: StructuredContainer, request: Request):
         """
-        Takes as input a structure container like this:
+        Takes as input a structured container like this:
         {
           "structured": [{
             "data": {
-              "height_inches": 74
-              "weight_pounds": 190
+              "heightInches": 74
+              "weightPounds": 190
             }
           }]
         }
@@ -57,8 +57,8 @@ class BMIAnnotator(ACDAnnotator):
         if data is not None:
             # Note that to reference weight_pounds and height_inches like this, we had to add the types to the container
             # model at the top of this class.
-            if data.weight_pounds is not None and data.height_inches is not None:
-                data.bmi = round((data.weight_pounds / (data.height_inches * data.height_inches)) * 703, 1)
+            if data.weightPounds is not None and data.heightInches is not None:
+                data.bmi = round((data.weightPounds / (data.heightInches * data.heightInches)) * 703, 1)
 
 
 # This is our ASGI app, which can be run by any of a number of ASGI server implementations.
@@ -66,15 +66,24 @@ class BMIAnnotator(ACDAnnotator):
 # but creating our app as a factory allows uvicorn to load in environment variables,
 # logging configuration, etc, before our app is constructed.
 def app():
-    return fastapi_app_factory.build(BMIAnnotator(), example_request='''{
+    # create the standard ACD endpoints using a factory constructor.
+    myapp = fastapi_app_factory.build(BMIAnnotator(), example_request='''{
   "structured" : [ {
     "data" : {
-       "height_inches" : 70,
-       "weight_pounds" : 170
+       "heightInches" : 70,
+       "weightPounds" : 170
     }
    }
   ]
 }''')
+
+    # add an additional custom endpoint
+    @myapp.get(fastapi_app_factory.DEFAULT_BASE_URL + "/my_custom_endpoint")
+    async def custom_endpoint(request: Request):
+        """An example of how to add a custom endpoint to your microservice beyond the standard ACD endpoints."""
+        return {"someData": "Goes Here"}
+
+    return myapp
 
 
 # Debug your app in a python IDE debugger using the following
