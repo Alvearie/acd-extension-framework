@@ -46,8 +46,8 @@ class TestMain:
             "structured": [
                 {
                     "data": {
-                        "height_inches": 74,
-                        "weight_pounds": 170
+                        "heightInches": 74,
+                        "weightPounds": 170
                     }
                 }
             ]
@@ -56,8 +56,8 @@ class TestMain:
             "structured": [
                 {
                     "data": {
-                        "height_inches": 74,
-                        "weight_pounds": 170,
+                        "heightInches": 74,
+                        "weightPounds": 170,
                         "bmi": 21.8
                     }
                 }

@@ -196,8 +196,7 @@ def build(custom_annotator, example_request=EXAMPLE_REQUEST):
     @app.get(BASE_URL + "/status")
     async def status_endpoint(request: Request):
         """
-        This method returns information describing the state of the server
-        :return:
+        This method returns information describing the state of the server.
         """
         if await service_utils.is_annotator_healthy(custom_annotator, app):
             acd_service_info: service_utils.ServiceInfo = request.app.acd_service_info
