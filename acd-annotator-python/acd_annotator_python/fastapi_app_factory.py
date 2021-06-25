@@ -6,10 +6,10 @@
 #                                                                   #
 # ***************************************************************** #
 
+import json
 import logging
 import logging.config
 import time
-import json
 from fastapi import FastAPI, Body, Request, Response, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -70,15 +70,22 @@ EXAMPLE_REQUEST = {"unstructured": [
 ]
 }
 
-# example service properties. These will be overridden by environment properties
-DEFAULT_ANNOTATOR_NAME = 'Example ACD Microservice'
-DEFAULT_ANNOTATOR_DESCRIPTION = 'Example ACD microservice annotator'
-DEFAULT_BASE_URL = '/services/example_acd_service/api/v1'
-DEFAULT_VERSION = '2021-04-06T15:37:31Z'
-DEFAULT_MAX_THREADS = 10
+# example service property default values.
+DEFAULT_ANNOTATOR_NAME: str = 'Example ACD Microservice'
+DEFAULT_ANNOTATOR_DESCRIPTION: str = 'Example ACD microservice annotator'
+DEFAULT_BASE_URL: str = '/services/example_acd_service/api/v1'
+DEFAULT_VERSION: str = '2021-04-06T15:37:31Z'
+DEFAULT_MAX_THREADS: int = 10
+
+# example service properties. These are set to defaults and are overridden by environment properties at app build time.
+ANNOTATOR_NAME: str = DEFAULT_ANNOTATOR_NAME
+ANNOTATOR_DESCRIPTION: str = DEFAULT_ANNOTATOR_DESCRIPTION
+BASE_URL: str = DEFAULT_BASE_URL
+VERSION: str = DEFAULT_VERSION
+MAX_THREADS: int = DEFAULT_MAX_THREADS
 
 
-def build(custom_annotator, example_request=EXAMPLE_REQUEST):
+def build(custom_annotator, example_request=json.dumps(EXAMPLE_REQUEST)):
     """
     Build a fastapi app from the given custom_annotator.
 
@@ -101,13 +108,14 @@ def build(custom_annotator, example_request=EXAMPLE_REQUEST):
     """
 
     # read environment variables
-    ANNOTATOR_NAME: str = service_utils.getenv('com_ibm_watson_health_common_annotator_name', DEFAULT_ANNOTATOR_NAME)
-    ANNOTATOR_DESCRIPTION: str = service_utils.getenv('com_ibm_watson_health_common_annotator_description',
-                                                      DEFAULT_ANNOTATOR_DESCRIPTION)
-    BASE_URL: str = service_utils.getenv('com_ibm_watson_health_common_base_url', DEFAULT_BASE_URL).rstrip("/")
-    VERSION: str = service_utils.getenv('com_ibm_watson_health_common_version', DEFAULT_VERSION)
-    MAX_THREADS: int = int(service_utils.getenv('com_ibm_watson_health_common_python_max_threads',
-                                                DEFAULT_MAX_THREADS))
+    global ANNOTATOR_NAME, ANNOTATOR_DESCRIPTION, BASE_URL, VERSION, MAX_THREADS
+    ANNOTATOR_NAME = service_utils.getenv('com_ibm_watson_health_common_annotator_name', DEFAULT_ANNOTATOR_NAME)
+    ANNOTATOR_DESCRIPTION = service_utils.getenv('com_ibm_watson_health_common_annotator_description',
+                                                 DEFAULT_ANNOTATOR_DESCRIPTION)
+    BASE_URL = service_utils.getenv('com_ibm_watson_health_common_base_url', DEFAULT_BASE_URL).rstrip("/")
+    VERSION = service_utils.getenv('com_ibm_watson_health_common_version', DEFAULT_VERSION)
+    MAX_THREADS = int(service_utils.getenv('com_ibm_watson_health_common_python_max_threads',
+                                           DEFAULT_MAX_THREADS))
     PROCESS_URL = "/process"
 
     app = FastAPI(
@@ -136,7 +144,7 @@ def build(custom_annotator, example_request=EXAMPLE_REQUEST):
         try:
             container_group = ContainerGroup(**body)
             container_group.schema_json()
-        except Exception as e:
+        except Exception:
             # note: exception messages get sanitized in the exception handler to avoid logging doc bodies
             logging.exception('Input container failed validation')
             raise ACDException(status_code=status.HTTP_400_BAD_REQUEST,
@@ -268,7 +276,7 @@ def build(custom_annotator, example_request=EXAMPLE_REQUEST):
         response: Response = await call_next(request)
 
         # exit logging
-        kv_log_builder.add_item('api_time', f'{time.time()-start_ts:0.03f}')
+        kv_log_builder.add_item('api_time', f'{time.time() - start_ts:0.03f}')
         kv_log_builder.add_item('api_rc', response.status_code)
         kv_log_builder.add_item('api_size_i', request.headers.get("content-length"))
         logger.info(f'<{request.method} {request.url} {kv_log_builder}')
