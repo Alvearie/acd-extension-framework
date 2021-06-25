@@ -78,16 +78,10 @@ def app():
 }''')
 
     # add an additional custom endpoint
-    @myapp.post(fastapi_app_factory.DEFAULT_BASE_URL + "/my_custom_endpoint")
+    @myapp.get(fastapi_app_factory.BASE_URL + "/my_custom_endpoint")
     async def custom_endpoint(request: Request):
         """An example of how to add a custom endpoint to your microservice beyond the standard ACD endpoints."""
         return {"someData": "Goes Here"}
-
-    # add an additional custom endpoint
-    @myapp.post(fastapi_app_factory.BASE_URL + "/my_custom_endpoint2")
-    async def custom_endpoint2(request: Request):
-        """An example of how to add a custom endpoint to your microservice beyond the standard ACD endpoints."""
-        return {"someData2": "Goes Here2"}
 
     return myapp
 
