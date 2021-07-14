@@ -70,3 +70,15 @@ You can do this with
 ```
 pip3 install "git+https://github.com/Alvearie/acd-extension-framework/#egg=acd-annotator-python&subdirectory=acd-annotator-python"
 ```
+
+Alternatively you can deploy your service as a docker container using the Dockerfile provided inside of example_apps,
+which containerizes the code-resolution example annotator.
+Build it by doing
+```
+cd example_apps/
+docker build -t code-resolution:latest .
+```
+and then run it with
+```
+docker run -it -p 8080:80 code-resolution:latest 
+```
