@@ -74,7 +74,7 @@ class CodeResolutionAnnotator(ACDAnnotator):
 
     In this case we have a known hierarchy of specificity among our attributes.
     ACD has identified several candidates across a document, but in order to simplify downstream consumption
-    we want to remove all but the most specific code according to the hierarchy from our output.
+    we want to remove all but the most specific codes.
     """
 
     def __init__(self, snomed_code_hierarchy):
