@@ -67,26 +67,24 @@ EXAMPLE = {
             }}]}
 
 
-class PostprocessingAnnotator(ACDAnnotator):
+class CodeResolutionAnnotator(ACDAnnotator):
     """
-    This annotator demonstrates a use case where instead of adding things to the container, you
-    want to apply business logic to the container after all of the other annotators have run.
-    This lets you combine disparate pieces of information. For example, perhaps you are dealing
-    with clinic notes with hierarchical sections, and you want to ignore any attributes
-    coming out of the first section. Or alternatively, perhaps you have a hierarchy of
-    specificity among your attributes. ACD has identified several candidates, but you only
-    want to return the most specific one according to you hierarchy. This annotator
-    demonstrates the last case.
+    This annotator demonstrates a use case where we want to integrate information from across
+    the entire document.
+
+    In this case we have a known hierarchy of specificity among our attributes.
+    ACD has identified several candidates across a document, but in order to simplify downstream consumption
+    we want to remove all but the most specific code according to the hierarchy from our output.
     """
 
     def __init__(self, snomed_code_hierarchy):
         """
-        Create a PostprocessingAnnotator with the given list of patterns
+        Create a CodeResolutionAnnotator with the given list of patterns
         :param search_patterns:
         """
         super().__init__()
         self.snomed_code_hierarchy = snomed_code_hierarchy
-        logger.info("Initializing PostprocessingAnnotator with codes: %s", snomed_code_hierarchy)
+        logger.info("Initializing CodeResolutionAnnotator with codes: %s", snomed_code_hierarchy)
 
     def on_startup(self, fastapi_app):
         """Load any required resources when the server starts up. (Not async to allow io operations)"""
@@ -130,14 +128,17 @@ class PostprocessingAnnotator(ACDAnnotator):
 
                     attributes_to_remove = []
                     for attribute in data.attributeValues:
-                        snomed_code = attribute.snomedConceptId
-                        if snomed_code in self.snomed_code_hierarchy and snomed_code != most_specific_code:
-                            attributes_to_remove.append(attribute)
+                        snomed_codes = attribute.snomedConceptId
+                        if snomed_codes is not None:
+                            # medical codes can be comma-delimited strings
+                            for snomed_code in snomed_codes.split(","):
+                                if snomed_code in self.snomed_code_hierarchy and snomed_code != most_specific_code:
+                                    attributes_to_remove.append(attribute)
                     for attribute in attributes_to_remove:
                         data.attributeValues.remove(attribute)
 
                     # log how many attributes were removed from this doc
-                    logger.debug("PostprocessingAnnotator removed %s attributes", len(attributes_to_remove))
+                    logger.debug("CodeResolutionAnnotator removed %s attributes", len(attributes_to_remove))
 
 
 # This is our ASGI app, which can be run by any of a number of ASGI server implementations.
@@ -145,7 +146,7 @@ class PostprocessingAnnotator(ACDAnnotator):
 # but creating our app as a factory allows uvicorn to load in environment variables,
 # logging configuration, etc, before our app is constructed.
 def app():
-    return fastapi_app_factory.build(PostprocessingAnnotator(LUNG_CANCER_CODE_HIERARCHY), example_request=EXAMPLE)
+    return fastapi_app_factory.build(CodeResolutionAnnotator(LUNG_CANCER_CODE_HIERARCHY), example_request=EXAMPLE)
 
 
 # Debug your app in a python IDE debugger using the following
@@ -155,7 +156,7 @@ if __name__ == "__main__":
     import acd_annotator_python
     from acd_annotator_python import service_utils
 
-    uvicorn.run("example_apps.postprocessing_annotator:app", host="localhost", port=8000, reload=True,
+    uvicorn.run("example_apps.code_resolution_annotator:app", host="localhost", port=8000, reload=True,
                 reload_dirs=[".", os.path.dirname(acd_annotator_python.__file__)],  # watch for changes
                 factory=True,
                 log_config=service_utils.DEFAULT_LOG_SETTINGS

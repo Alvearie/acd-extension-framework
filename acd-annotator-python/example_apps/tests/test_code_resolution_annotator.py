@@ -10,7 +10,7 @@ import json
 import pytest
 
 from acd_annotator_python import fastapi_app_factory
-from example_apps.postprocessing_annotator import PostprocessingAnnotator
+from example_apps.code_resolution_annotator import CodeResolutionAnnotator
 from fastapi.testclient import TestClient
 
 # TODO: load from env
@@ -30,7 +30,7 @@ def client():
     print("starting test server")
     # codes below ordered from less->more specific: ["cancer", "lung cancer", "non-small-cell lung cancer"]
     LUNG_CANCER_CODE_HIERARCHY = ['363346000', '93880001', '254637007']
-    app = fastapi_app_factory.build(PostprocessingAnnotator(LUNG_CANCER_CODE_HIERARCHY))
+    app = fastapi_app_factory.build(CodeResolutionAnnotator(LUNG_CANCER_CODE_HIERARCHY))
     with TestClient(app) as client:
         yield client
     print("shutting down test server")
