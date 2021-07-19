@@ -11,4 +11,4 @@ EXPOSE 9443
 CMD ["uvicorn", "app.code_resolution_annotator:app", "--host", "0.0.0.0", "--port", "9443", "--factory"]
 
 # ssl-enabled variant (to integrate with ACD, these keys should be generated via OpenShift where your ACD instance is deployed)
-# CMD ["uvicorn", "app.code_resolution_annotator:app", "--host", "0.0.0.0", "--port", "9443", "--factory", "--ssl-keyfile", "/ssl/tls.key", "--ssl-certfile", "/ssl/tls.crt"]
+# CMD ["uvicorn", "app.code_resolution_annotator:app", "--host", "0.0.0.0", "--port", "9443", "--factory", "--ssl-keyfile", "/ssl/tls.key", "--ssl-certfile", "/ssl/tls.crt", "--ssl-ciphers", "TLSv1.2"]
