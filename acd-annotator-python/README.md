@@ -80,5 +80,7 @@ docker build -t code-resolution:latest .
 ```
 and then run it with
 ```
-docker run -it -p 8080:80 code-resolution:latest 
+docker run -it -p 9443:9443 code-resolution:latest 
 ```
+
+After the docker container starts, test it by going to `localhost:9443/docs` (use http or https as appropriate depending on whether you have TLS enabled in your Dockerfile)
