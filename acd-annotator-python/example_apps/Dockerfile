@@ -13,4 +13,4 @@ CMD ["uvicorn", "app.code_resolution_annotator:app", "--host", "0.0.0.0", "--por
 # # ssl-enabled variant (to integrate with ACD, these keys should be generated via OpenShift where your ACD instance is deployed)
 # COPY ssl/key.pem /ssl/key.pem
 # COPY ssl/cert.pem /ssl/cert.pem
-# CMD ["uvicorn", "app.code_resolution_annotator:app", "--host", "0.0.0.0", "--port", "9443", "--factory", "--ssl-keyfile", "/ssl/key.pem", "--ssl-certfile", "/ssl/cert.pem"]
+# CMD ["uvicorn", "app.code_resolution_annotator:app", "--host", "0.0.0.0", "--port", "9443", "--factory", "--ssl-keyfile", "/ssl/tls.key", "--ssl-certfile", "/ssl/tls.crt"]
