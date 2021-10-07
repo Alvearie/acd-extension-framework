@@ -97,6 +97,9 @@ def build(custom_annotator, example_request=json.dumps(EXAMPLE_REQUEST)):
         # url where docs should be served. Defaults to "/docs"
         com_ibm_watson_health_common_docs_url
 
+        # url where openapi.json should be served. Defaults to "/openapi.json"
+        com_ibm_watson_health_common_openapi_url
+
         # app version. A timestamp, e.g., 2021-04-06T15:37:31Z.
         # This is reported in ACD's annotator info APIs, and ideally corresponds to a build/release.
         com_ibm_watson_health_common_version
@@ -117,6 +120,7 @@ def build(custom_annotator, example_request=json.dumps(EXAMPLE_REQUEST)):
                                                  DEFAULT_ANNOTATOR_DESCRIPTION)
     BASE_URL = service_utils.getenv('com_ibm_watson_health_common_base_url', DEFAULT_BASE_URL).rstrip("/")
     DOCS_URL = service_utils.getenv('com_ibm_watson_health_common_docs_url', "/docs").rstrip("/")
+    OPENAPI_URL = service_utils.getenv('com_ibm_watson_health_common_openapi_url', "/openapi.json").rstrip("/")
     VERSION = service_utils.getenv('com_ibm_watson_health_common_version', DEFAULT_VERSION)
     MAX_THREADS = int(service_utils.getenv('com_ibm_watson_health_common_python_max_threads',
                                            DEFAULT_MAX_THREADS))
@@ -126,7 +130,8 @@ def build(custom_annotator, example_request=json.dumps(EXAMPLE_REQUEST)):
         title=ANNOTATOR_NAME,
         version=VERSION,
         description=ANNOTATOR_DESCRIPTION,
-        docs_url=DOCS_URL
+        docs_url=DOCS_URL,
+        openapi_url=OPENAPI_URL
     )
 
     @app.post(BASE_URL + PROCESS_URL)
