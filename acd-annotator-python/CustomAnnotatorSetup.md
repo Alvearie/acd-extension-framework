@@ -17,16 +17,16 @@
 
    All of these fields should be logged as part of the Mapped Diagnostic Context (MDC) on any log messages to make troubleshooting easier.
 
-2. Your custom annotator should use an OpenShift CA issued certificate (This should happen naturally as part of the directions below). ACD will trust anything from the OpenShift CA in your cluster. Note that OpenShift CA issued certificates are only valid in the cluster DNS and target service url should have the form `https://<service.name>.<service.namespace>.svc` as noted in the link above.
+2. Your custom annotator should use an OpenShift CA issued certificate (This should happen naturally as part of the directions below). ACD will trust anything from the OpenShift CA in your cluster. Note that OpenShift CA issued certificates are only valid in the cluster DNS and target service url should have the form `https://<service.name>.<service.namespace>.svc`.
 
 
 **Installation instructions**
 
-1) This repository contains helm chart templates for deploying your custom annotator.  They reside in `acd-extension-framework/acd-annotator-python/helm-charts/custom-annotator-template`.  These templates are we will modify to deploy your custom annotator to your OpenShift cluster.  You can copy the templates to a different working location or simply edit them in place in your project space.
+1) This repository contains [helm chart templates](https://github.com/Alvearie/acd-extension-framework/blob/main/acd-annotator-python/helm-charts/custom-annotator-template) for deploying your custom annotator.  We will modify these templates to deploy your custom annotator to your OpenShift cluster.  You can copy the templates to a different working location or simply edit them in place in your project space.
 
     The `Charts.yaml` and `values.yaml` files contain templated variables that you should replace with values that are appropriate for your environment.  Each of the variables is described below.  Ensure that you replace all templated variables in `Charts.yaml` and `values.yaml` before proceeding.
 
-    * <CUSTOM_PROJECT_NAME> - The name of the OpenShift project that you will create to house your custom annotator deployment.  **NOTE**: This should be a different project name than the project under which ACD is deployed.
+    * <CUSTOM_PROJECT_NAME> - The name of the OpenShift project that you will create for your custom annotator deployment.  **This should be a different project name than the project under which ACD is deployed.**
     * <ACD_PROJECT_NAME> - The name of the OpenShift project that your ACD instance is deployed into.
     * <APPLICATION_NAME> - The application name for your custom annotator.  We'll use `custom-annotator` for this demo.
     * <DOCKER_IMAGE_PATH> - The path to your custom annotator's Docker image.
