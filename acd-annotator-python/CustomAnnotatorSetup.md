@@ -91,7 +91,7 @@
 
 9) Check that the new annotator is recognized by ACD
 
-    Open a terminal to one of your ACD pods (find a pod that starts with `ibm-wh-acd-acd`) and call the GET annotators endpoint confirm that your annotator is in the list.
+    Open a terminal to one of your ACD pods (find a pod that starts with `ibm-wh-acd-acd`) and call the GET annotators endpoint to confirm that your annotator is in the list.
 
     Run
     `curl -k  https://localhost:9443/services/clinical_data_annotator/api/v1/annotators?version=2021-03-01`
@@ -137,7 +137,7 @@
     }" "https://localhost:9443/services/clinical_data_annotator/api/v1/analyze?debug_text_restore=false&version=2021-07-12&return_analyzed_text=false"
     ```
 
-    The result should be some JSON with concepts.  
+    You should see a JSON response that includes your custom annotator in the `annotatorFlows` list.
 
     ```
     {"annotatorFlows":[{"flow":{"elements":[{"annotator":{"name":"concept_detection"}},{"annotator":{"name":"custom-annotator"}}],"async":false}}],"unstructured":[{"data":{"concepts":[{"cui":"C0332310","preferredName":"Has patient","semanticType":"ftcn","source":"umls","sourceVersion":"2020AA","type":"umls.FunctionalConcept","begin":0,"end":11,"coveredText":"Patient has"},{"cui":"C1306460","preferredName":"Primary malignant neoplasm of lung","semanticType":"neop","source":"umls","sourceVersion":"2020AA","type":"umls.NeoplasticProcess","begin":12,"end":23,"coveredText":"lung cancer"},{"cui":"C0684249","preferredName":"Carcinoma of lung","semanticType":"neop","source":"umls","sourceVersion":"2020AA","type":"umls.NeoplasticProcess","begin":12,"end":23,"coveredText":"lung cancer"},{"cui":"C0242379","preferredName":"Malignant neoplasm of lung","semanticType":"neop","source":"umls","sourceVersion":"2020AA","type":"umls.NeoplasticProcess","begin":12,"end":23,"coveredText":"lung cancer"}]}}]}
