@@ -2,7 +2,7 @@
 
 **Prerequisites** - Before following the directions in this document, ensure the following conditions are met:
 
-1. Create a Docker build of your custom annotator as documented here: https://github.com/Alvearie/acd-extension-framework/tree/main/acd-annotator-python#deployment-considerations (currently only have extensions for Python).  Note that the directions that follow use an https url.  **Before proceeding, ensure your Dockerfile is using the SSL enabled web server invocation.**
+1. Create a Docker build of your custom annotator as [documented here](https://github.com/Alvearie/acd-extension-framework/tree/main/acd-annotator-python#deployment-considerations).  Note that the directions that follow use an https url.  **Before proceeding, ensure your Dockerfile is using the SSL enabled web server invocation.**
 
 2. Push your custom annotator docker image to a docker repository.  We'll setup the OpenShift pull secret later in the instructions.
 
