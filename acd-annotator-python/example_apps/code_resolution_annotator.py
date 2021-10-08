@@ -114,13 +114,14 @@ class CodeResolutionAnnotator(ACDAnnotator):
 
                 # Pass 1: figure out which is the most specific code in the container
                 for attribute in data.attributeValues:
-                    snomed_codes = attribute.snomedConceptId
-                    if snomed_codes is not None:
-                        # medical codes can be comma-delimited strings
-                        for snomed_code in snomed_codes.split(","):
-                            if snomed_code in self.snomed_code_hierarchy:
-                                most_specific_code_idx = max(most_specific_code_idx or -1,
-                                                         self.snomed_code_hierarchy.index(snomed_code))
+                    if hasattr(attribute, "snomedConceptId"):
+                        snomed_codes = attribute.snomedConceptId
+                        if snomed_codes is not None:
+                            # medical codes can be comma-delimited strings
+                            for snomed_code in snomed_codes.split(","):
+                                if snomed_code in self.snomed_code_hierarchy:
+                                    most_specific_code_idx = max(most_specific_code_idx or -1,
+                                                             self.snomed_code_hierarchy.index(snomed_code))
 
                 # Pass 2: filter out any codes that are subsumed by a more specific code
                 if most_specific_code_idx is not None:
@@ -128,12 +129,13 @@ class CodeResolutionAnnotator(ACDAnnotator):
 
                     attributes_to_remove = []
                     for attribute in data.attributeValues:
-                        snomed_codes = attribute.snomedConceptId
-                        if snomed_codes is not None:
-                            # medical codes can be comma-delimited strings
-                            for snomed_code in snomed_codes.split(","):
-                                if snomed_code in self.snomed_code_hierarchy and snomed_code != most_specific_code:
-                                    attributes_to_remove.append(attribute)
+                        if hasattr(attribute, "snomedConceptId"):
+                            snomed_codes = attribute.snomedConceptId
+                            if snomed_codes is not None:
+                                # medical codes can be comma-delimited strings
+                                for snomed_code in snomed_codes.split(","):
+                                    if snomed_code in self.snomed_code_hierarchy and snomed_code != most_specific_code:
+                                        attributes_to_remove.append(attribute)
                     for attribute in attributes_to_remove:
                         data.attributeValues.remove(attribute)
 
