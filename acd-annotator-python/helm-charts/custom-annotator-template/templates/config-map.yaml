@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ibm-wh-acd-config
+  namespace: {{ .Values.annotations.ACD_PROJECT_NAME }}
+data:
+  ibm-wh-acd-config.json: |
+    {
+      "acd.customAnnotators" : {
+        "{{ .Chart.Name }}" : {
+          "url" : "https://{{ .Chart.Name }}.{{ .Values.annotations.CUSTOM_PROJECT_NAME }}.svc:443/services/example_acd_service/api/v1/process",
+          "description" : "My custom annotator"
+        }
+      }
+    }

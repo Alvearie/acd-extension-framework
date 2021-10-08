@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}
+  annotations:
+    image.openshift.io/triggers: |-
+      [
+        {
+          "from": {
+            "kind": "ImageStreamTag",
+            "name": "{{ .Values.image.dockerImagePath }}"
+          },
+          "fieldPath": "spec.template.spec.containers[0].image"
+        }
+      ]
+  namespace: {{ .Values.annotations.CUSTOM_PROJECT_NAME }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+    spec:
+      volumes:
+        - name: volume-certs
+          secret:
+            secretName: {{ .Chart.Name }} 
+            defaultMode: 420
+      containers:
+        - name: {{ .Chart.Name }}
+          image: {{ .Values.image.dockerImagePath }}
+          ports:
+            - containerPort: 9443
+              protocol: TCP
+          volumeMounts:
+            - name: volume-certs
+              mountPath: /ssl

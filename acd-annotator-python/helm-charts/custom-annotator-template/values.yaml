@@ -1,0 +1,6 @@
+annotations:
+  ACD_PROJECT_NAME: <ACD_PROJECT_NAME>
+  CUSTOM_PROJECT_NAME: <CUSTOM_PROJECT_NAME>
+
+image:
+  dockerImagePath: <DOCKER_IMAGE_PATH>
