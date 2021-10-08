@@ -57,12 +57,7 @@ Then modify the code paying attention to inline comments about how to:
 1. Add tests for your annotator logic.
 
 
-## Running a custom ACD annotator in your own managed ACD pipeline 
-
-...under construction...
-
-
-## Deployment considerations ##
+## Pip install the ACD extension framework ##
 
 In deployment scenarios, you will probably want to pip install 
 the `acd_annotator_python` module instead of installing it from source. 
@@ -71,9 +66,9 @@ You can do this with
 pip3 install "git+https://github.com/Alvearie/acd-extension-framework/#egg=acd-annotator-python&subdirectory=acd-annotator-python"
 ```
 
-Alternatively you can deploy your service as a docker container using the Dockerfile provided inside of example_apps,
-which containerizes the code-resolution example annotator.
-Build it by doing
+## Build a docker image with your custom annotator ##
+You can build your service as a docker image using the [Dockerfile](https://github.com/Alvearie/acd-extension-framework/blob/main/acd-annotator-python/example_apps/Dockerfile) inside of example_apps, which containerizes the code-resolution example annotator.  If you are ready to enable TLS, edit the Dockerfile. Build it by doing
+
 ```
 cd example_apps/
 docker build -t code-resolution:latest .
@@ -84,3 +79,8 @@ docker run -it -p 9443:9443 code-resolution:latest
 ```
 
 After the docker container starts, test it by going to `localhost:9443/docs` (use http or https as appropriate depending on whether you have TLS enabled in your Dockerfile)
+
+
+## Deploy custom annotator into OpenShift cluster
+
+Refer to [this page](https://github.com/Alvearie/acd-extension-framework/blob/main/acd-annotator-python/CustomAnnotatorSetup.md) when you are ready to deploy your custom annotator docker image into an OpenShift cluster
