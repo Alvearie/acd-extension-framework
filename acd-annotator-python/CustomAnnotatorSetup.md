@@ -2,11 +2,13 @@
 
 **Prerequisites** - Before following the directions in this document, ensure the following conditions are met:
 
-1. Create a Docker build of your custom annotator as [documented here](https://github.com/Alvearie/acd-extension-framework/tree/main/acd-annotator-python#deployment-considerations).  Note that the directions that follow use an https url.  **Before proceeding, ensure your Dockerfile is using the SSL enabled web server invocation.**
+1. Have a [container edition of ACD](https://ibm.github.io/acd-containers/) installed on an OpenShift cluster.
 
-2. Push your custom annotator docker image to a docker repository.  We'll setup the OpenShift pull secret later in the instructions.
+2. Create a Docker build of your custom annotator as [documented here](https://github.com/Alvearie/acd-extension-framework/tree/main/acd-annotator-python#deployment-considerations).  Note that the directions that follow use an https url.  **Before proceeding, ensure your Dockerfile is using the SSL enabled web server invocation.**
 
-3. Appropriate network policies - Your custom annotator needs to be network accessible from ACD.  It will be deployed into a different project space than your ACD instance.
+3. Push your custom annotator docker image to a docker repository.  We'll setup the OpenShift pull secret later in the instructions.
+
+4. Appropriate network policies - No action necessary unless you have more stringent network policies than OpenShift comes with by default.  Network communication does need to work between your ACD project and the project we will create for your custom annotator.
 
 **Other Notes**
 
@@ -61,11 +63,11 @@
     ```
     bash$ curl -k https://<APPLICATION_NAME>.<CUSTOM_PROJECT_NAME>.svc:443/services/example_acd_service/api/v1/status
 
-    {"version":"2021-04-06T15:37:31Z","upTime":"0d 00:38:53","serviceState":"OK","hostName":"custom-annotator2-
+    {"version":"2021-04-06T15:37:31Z","upTime":"0d 00:38:53","serviceState":"OK","hostName":"custom-annotator-
     5df7f54c5f-r96fj","requestCount":44,"maxMemoryMb":30,"inUseMemoryMb":31,"commitedMemoryMb":47,"availableProcessors":16}
     ```
 
-    If the check above works, now go over to your ACD namespace and run the same curl command from an ACD pod (find a pod that starts with
+    If the check above works, go over to your ACD namespace and run the same curl command from an ACD pod (find a pod that starts with
 `ibm-wh-acd-acd`).  Note that your container must be built with SSL support for the https version of the url to work.
 
 7) Wait for the config map to be recognized by the ACD pods - This typically happens within a minute.  You can check the config map contents by executing a `cat /etc/config/ibm-wh-acd-config.json` on one of the ACD pods.  Check that the contents look correct.
@@ -89,7 +91,7 @@
 
 9) Check that the new annotator is recognized by ACD
 
-    Open a terminal to one of your ACD pods and call the GET annotators endpoint confirm that your annotator is in the list.
+    Open a terminal to one of your ACD pods (find a pod that starts with `ibm-wh-acd-acd`) and call the GET annotators endpoint confirm that your annotator is in the list.
 
     Run
     `curl -k  https://localhost:9443/services/clinical_data_annotator/api/v1/annotators?version=2021-03-01`
@@ -104,7 +106,7 @@
 
 10) Final checks
 
-    First, run a flow locally from an ACD pod that references your custom annotator.  
+    First, run a flow that references your custom annotator from an ACD pod (find a pod that starts with `ibm-wh-acd-acd`).  
 
     ```
     curl -k -X POST --header "Content-Type: application/json" --header "Accept: application/json" -d "{
@@ -141,4 +143,4 @@
     {"annotatorFlows":[{"flow":{"elements":[{"annotator":{"name":"concept_detection"}},{"annotator":{"name":"custom-annotator"}}],"async":false}}],"unstructured":[{"data":{"concepts":[{"cui":"C0332310","preferredName":"Has patient","semanticType":"ftcn","source":"umls","sourceVersion":"2020AA","type":"umls.FunctionalConcept","begin":0,"end":11,"coveredText":"Patient has"},{"cui":"C1306460","preferredName":"Primary malignant neoplasm of lung","semanticType":"neop","source":"umls","sourceVersion":"2020AA","type":"umls.NeoplasticProcess","begin":12,"end":23,"coveredText":"lung cancer"},{"cui":"C0684249","preferredName":"Carcinoma of lung","semanticType":"neop","source":"umls","sourceVersion":"2020AA","type":"umls.NeoplasticProcess","begin":12,"end":23,"coveredText":"lung cancer"},{"cui":"C0242379","preferredName":"Malignant neoplasm of lung","semanticType":"neop","source":"umls","sourceVersion":"2020AA","type":"umls.NeoplasticProcess","begin":12,"end":23,"coveredText":"lung cancer"}]}}]}
     ```
 
-    If this works, you can test it from the external endpoint with a bearer token, but at this point, your custom annotator should be installed.
+    If this works, you can test from the external endpoint as [documented here](https://ibm.github.io/acd-containers/security/manage-access/)
