@@ -10,8 +10,12 @@ ACD Cloud Documentation: https://cloud.ibm.com/docs/wh-acd
 
 ACD API Documentation: https://cloud.ibm.com/apidocs/wh-acd
 
-ACD SDK on Git Hub:
+ACD SDK on GitHub:
+
 https://github.com/IBM/whcs-python-sdk
+
 https://github.com/IBM/whcs-java-sdk
+
 https://github.com/IBM/whcs-node-sdk
+
 https://github.com/IBM/whcs-go-sdk
