@@ -5,18 +5,16 @@ This project contains numerous resources to extend a managed ACD instance with c
 
 Some useful ACD references:
 
-ACD Demo: https://acd-try-it-out.mybluemix.net/preview
+ACD Demo: https://merative.net/tryacd (previously https://acd-try-it-out.mybluemix.net/preview )
 
-ACD Cloud Documentation: https://cloud.ibm.com/docs/wh-acd
+ACD Cloud Documentation: https://merative.github.io/acd-containers
 
-ACD API Documentation: https://cloud.ibm.com/apidocs/wh-acd
+ACD API Documentation: https://merative.github.io/acd-containers/apidocs/index.html#annotator-for-clinical-data-acd
 
 ACD SDK on GitHub:
 
-https://github.com/IBM/whcs-python-sdk
+https://github.com/merative/acd-python-sdk
 
-https://github.com/IBM/whcs-java-sdk
+https://github.com/merative/acd-java-sdk
 
-https://github.com/IBM/whcs-node-sdk
 
-https://github.com/IBM/whcs-go-sdk
